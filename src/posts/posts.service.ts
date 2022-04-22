@@ -4,11 +4,13 @@ import { Posts, PostsDocument } from 'src/schemas/post.schema';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { Model } from 'mongoose';
+import { User, UserDocument } from 'src/schemas/user.schema';
 
 @Injectable()
 export class PostsService {
   constructor(
     @InjectModel(Posts.name) private postModel: Model<PostsDocument>,
+    @InjectModel(User.name) private userModel: Model<UserDocument>,
   ) {}
 
   async findNewest(): Promise<Posts[]> {
@@ -35,8 +37,14 @@ export class PostsService {
     return this.postModel.find().exec();
   }
 
-  findOne(id: string): any {
-    return this.postModel.findOne({ _id: id }).exec();
+  // findOne(id: string): any {
+  //   return this.postModel.findOne({ _id: id }).exec();
+  // }
+  async findOne(id: string) {
+    let post = (await this.postModel.findOne({ _id: id })) as any;
+    let user = await this.userModel.findOne({ _id: post.userId });
+    let res = { ...post._doc, user: user };
+    return res;
   }
 
   async update(id: string, updatePostDto: UpdatePostDto) {
