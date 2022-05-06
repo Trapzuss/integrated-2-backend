@@ -12,6 +12,7 @@ import {
   Request,
   Res,
   Response,
+  Session,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
@@ -41,9 +42,26 @@ export class AuthController {
     return this.authService.create(createAuthDto);
   }
 
-  @Post('logout')
-  logout(@Request() req, @Response() res) {
-    return this.authService.logout();
+  @Get('logout')
+  async logout(@Request() req, @Response({ passthrough: true }) res) {
+    try {
+      await req.session?.destroy();
+      // console.log(req.session);
+      res.clearCookie('connect.sid');
+
+      return { msg: 'Log out' };
+    } catch (error) {
+      console.log(error);
+      return error.response.data.message;
+    }
+  }
+
+  @Get('session')
+  async getAuthStssion(@Session() session: Record<string, any>) {
+    console.log(session);
+    console.log(session.id);
+
+    // console.log(session.id);
   }
 
   @UseGuards(AuthenticatedGuard)

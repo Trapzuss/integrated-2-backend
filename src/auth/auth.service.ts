@@ -24,10 +24,6 @@ export class AuthService {
     return this.usersService.create(createAuthDto);
   }
 
-  logout() {
-    // return this.usersService.create();
-  }
-
   findAll() {
     return `This action returns all auth`;
   }
