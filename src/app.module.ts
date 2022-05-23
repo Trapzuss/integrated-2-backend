@@ -13,7 +13,8 @@ import { UserModule } from './user/user.module';
 @Module({
   imports: [
     PostsModule,
-    MongooseModule.forRoot('mongodb://localhost:27017/gallery'),
+    // MongooseModule.forRoot('mongodb://localhost:27017/gallery'),
+    MongooseModule.forRoot('mongodb+srv://yuuki:wasd1234@cluster0.njdpm.mongodb.net/ipets'),
     AuthModule,
     UserModule,
   ],
