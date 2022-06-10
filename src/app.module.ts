@@ -12,14 +12,16 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { MessagesModule } from './messages/messages.module';
 import { MessagesGateway } from './messages/messages.gateway';
-
+import { ConfigModule } from '@nestjs/config';
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    MongooseModule.forRoot(process.env.MONGO_URI),
+
     PostsModule,
-    // MongooseModule.forRoot('mongodb://localhost:27017/gallery'),
-    MongooseModule.forRoot(
-      'mongodb+srv://yuuki:wasd1234@cluster0.njdpm.mongodb.net/ipets',
-    ),
+
     AuthModule,
     UserModule,
     MessagesModule,

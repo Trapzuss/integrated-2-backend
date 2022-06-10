@@ -24,6 +24,7 @@ import { get } from 'http';
 import { LocalAuthGuard } from './local-auth-guard';
 import { AuthenticatedGuard } from './authenticated.guard';
 import { UserService } from 'src/user/user.service';
+import { JwtAuthGuard } from './jwt-auth-guard';
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -34,7 +35,8 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @Post('login')
   login(@Request() req): any {
-    return { msg: 'Logged in!' };
+    // return { msg: 'Logged in!' };
+    return this.authService.login(req.user);
   }
 
   @Post('register')

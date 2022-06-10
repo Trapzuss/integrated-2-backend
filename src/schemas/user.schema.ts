@@ -13,9 +13,6 @@ export class User {
 
   @Prop({ required: true })
   userDisplayName: string;
-
-  @Prop({ default: [] })
-  postList: Array<any>;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

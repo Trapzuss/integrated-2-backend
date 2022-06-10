@@ -3,8 +3,12 @@ import { AppModule } from './app.module';
 import * as session from 'express-session';
 import * as passport from 'passport';
 import * as cookieParser from 'cookie-parser';
+import { ConfigService } from '@nestjs/config';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const configService = app.get(ConfigService);
+  const port = configService.get('PORT');
+  const sessionSecret = configService.get('SESSION_SECRET');
   app.enableCors({
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
@@ -19,7 +23,7 @@ async function bootstrap() {
 
   app.use(
     session({
-      secret: 'keyboard cat',
+      secret: sessionSecret,
       resave: false,
       saveUninitialized: false,
       cookie: { maxAge: 3600000 },
@@ -30,6 +34,6 @@ async function bootstrap() {
   app.use(passport.session());
 
   app.use(cookieParser());
-  await app.listen(3000);
+  await app.listen(port);
 }
 bootstrap();
