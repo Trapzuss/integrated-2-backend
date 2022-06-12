@@ -21,19 +21,18 @@ async function bootstrap() {
     origin: true,
   });
 
-  app.use(
-    session({
-      secret: sessionSecret,
-      resave: false,
-      saveUninitialized: false,
-      cookie: { maxAge: 3600000 },
-    }),
-  );
+  // app.use(
+  //   session({
+  //     secret: sessionSecret,
+  //     resave: false,
+  //     saveUninitialized: false,
+  //     cookie: { maxAge: 3600000 },
+  //   }),
+  // );
+  // app.use(cookieParser());
+  // app.use(passport.session());
+  // app.use(passport.initialize());
 
-  app.use(passport.initialize());
-  app.use(passport.session());
-
-  app.use(cookieParser());
   await app.listen(port);
 }
 bootstrap();

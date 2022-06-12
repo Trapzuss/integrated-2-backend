@@ -7,6 +7,7 @@ import { UpdateAuthDto } from './dto/update-auth.dto';
 import { Model } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { Public } from 'src/utils/decorator';
 
 @Injectable()
 export class AuthService {
@@ -20,8 +21,9 @@ export class AuthService {
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (isMatch) {
-      const { password, username, ...rest } = user;
-      return rest;
+      const { password, username, ...result } = user;
+      // console.log(result);
+      return result;
     } else {
       throw new HttpException(
         {
@@ -34,7 +36,8 @@ export class AuthService {
   }
 
   async login(user: any) {
-    const payload = { username: user.username, sub: user._id };
+    const doc = user._doc;
+    const payload = { username: doc.username, sub: doc._id };
 
     return {
       access_token: this.jwtService.sign(payload),
