@@ -2,10 +2,13 @@ import { PartialType } from '@nestjs/mapped-types';
 import { CreatePostDto } from './create-post.dto';
 
 export class UpdatePostDto extends PartialType(CreatePostDto) {
-  title: string;
+  userId: string;
+  petName: string;
+  images: [];
+  address: {};
   description: string;
-  category: string;
-  imageUrl: string;
-  favoriteAmount: number;
-  userId?: string;
+  sex: string;
+  age: number;
+  weight: number;
+  price: number;
 }

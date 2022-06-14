@@ -1,8 +1,15 @@
+import internal from "stream";
+
 export class CreatePostDto {
-  title: string;
-  description: string;
-  category: string;
-  imageUrl: string;
-  favoriteAmount: number;
   userId: string;
+  petName: string;
+  images: [];
+  address: {};
+  description: string;
+  sex: string;
+  age: number;
+  weight: number;
+  price: number;
+  createdAt: Date;
+  adoptedAt: Date;
 }

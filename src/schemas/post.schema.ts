@@ -29,6 +29,9 @@ export class Posts {
   age: number;
 
   @Prop({ required: true, type: Number })
+  weight: number;
+
+  @Prop({ required: true, type: Number })
   price: number;
 
   @Prop({ default: Date.now, type: Date })
