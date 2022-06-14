@@ -26,11 +26,6 @@ export class PostsController {
     return this.postsService.findNewest();
   }
 
-  @Post(':id')
-  increaseFavorite(@Param('id') id: string) {
-    return this.postsService.increaseFavorite(id);
-  }
-
   // Basic CRUD
   @Post()
   create(@Body() createPostDto: CreatePostDto) {

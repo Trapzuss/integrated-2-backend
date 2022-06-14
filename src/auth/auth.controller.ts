@@ -41,7 +41,13 @@ export class AuthController {
 
   @Post('register')
   register(@Body() createAuthDto: CreateAuthDto) {
-    return this.authService.create(createAuthDto);
+    try {
+      return this.authService.create(createAuthDto);
+    } catch (error) {
+      console.log('is in error');
+      console.log(error);
+      return error.response.data.message;
+    }
   }
 
   @Post('logout')
@@ -53,7 +59,7 @@ export class AuthController {
 
       return { msg: 'Log out' };
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       return error.response.data.message;
     }
   }

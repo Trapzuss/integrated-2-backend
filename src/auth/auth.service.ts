@@ -45,7 +45,12 @@ export class AuthService {
   }
 
   async create(createAuthDto: CreateAuthDto): Promise<User> {
-    return this.usersService.create(createAuthDto);
+    try {
+      return this.usersService.create(createAuthDto);
+    } catch (error) {
+      console.log('is in error');
+      console.log(error);
+    }
   }
 
   findAll() {

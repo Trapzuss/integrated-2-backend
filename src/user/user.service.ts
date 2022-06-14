@@ -26,23 +26,29 @@ export class UserService {
   //   },
   // ];
   async create(createAuthDto: CreateAuthDto) {
-    const oldUser = await this.userModel.findOne({
-      username: createAuthDto.username,
-    });
-    if (oldUser) {
-      throw new HttpException(
-        {
-          status: HttpStatus.BAD_REQUEST,
-          error: 'This username already exist.',
-        },
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+    try {
+      const oldUser = await this.userModel.findOne({
+        email: createAuthDto.email,
+      });
 
-    const saltOrRounds = 10;
-    const password = createAuthDto.password;
-    const hash = await bcrypt.hash(password, saltOrRounds);
-    return new this.userModel({ ...createAuthDto, password: hash }).save();
+      if (oldUser) {
+        throw new HttpException(
+          {
+            status: HttpStatus.BAD_REQUEST,
+            error: 'This email already exist.',
+          },
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      const saltOrRounds = 10;
+      const password = createAuthDto.password;
+      const hash = await bcrypt.hash(password, saltOrRounds);
+
+      return new this.userModel({ ...createAuthDto, password: hash }).save();
+    } catch (error) {
+      console.log(error);
+      return error;
+    }
   }
 
   async findOne(username: string) {

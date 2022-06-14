@@ -5,11 +5,17 @@ export type MessagesDocument = Messages & Document;
 
 @Schema()
 export class Messages {
-  @Prop({ required: true })
-  name: string;
+  @Prop({ required: true, type: String, ref: 'User' })
+  userId: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, type: String, ref: 'Post' })
+  postId: string;
+
+  @Prop({ required: true, type: String })
   text: string;
+
+  @Prop({ required: true, type: Date })
+  createdAt: Date;
 }
 
 export const MessagesSchema = SchemaFactory.createForClass(Messages);

@@ -17,16 +17,16 @@ export class PostsService {
     return this.postModel.find();
   }
 
-  async increaseFavorite(id: string) {
-    let post = this.postModel.findOne({ _id: id }).exec();
-    let amount = (await post).favoriteAmount + 1;
-    let response = this.postModel.updateOne(
-      { _id: id },
-      { $set: { ...post, favoriteAmount: amount } },
-    );
+  // async increaseFavorite(id: string) {
+  //   let post = this.postModel.findOne({ _id: id }).exec();
+  //   let amount = (await post).favoriteAmount + 1;
+  //   let response = this.postModel.updateOne(
+  //     { _id: id },
+  //     { $set: { ...post, favoriteAmount: amount } },
+  //   );
 
-    return response;
-  }
+  //   return response;
+  // }
 
   // Essential CRUD
   async create(createPostDto: CreatePostDto): Promise<Posts> {
