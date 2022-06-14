@@ -4,7 +4,6 @@ import { AuthController } from './auth.controller';
 import { UserModule } from 'src/user/user.module';
 import { PassportModule } from '@nestjs/passport';
 import { LocalStrategy } from './local.strategy';
-import { SessionSerializer } from './session.serializer';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './jwt.strategy';
 import { ConfigModule } from '@nestjs/config';
@@ -27,7 +26,6 @@ import { APP_GUARD } from '@nestjs/core';
   providers: [
     AuthService,
     LocalStrategy,
-    SessionSerializer,
     JwtStrategy,
     // {
     //   provide: APP_GUARD,

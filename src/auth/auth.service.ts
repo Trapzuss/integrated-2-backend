@@ -16,13 +16,13 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async validateUser(username: string, password: string): Promise<any> {
-    const user = (await this.usersService.findOne(username)) as any;
+  async validateUser(email: string, password: string): Promise<any> {
+    const user = (await this.usersService.findOne(email)) as any;
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (isMatch) {
       const { password, username, ...result } = user;
-      // console.log(result);
+
       return result;
     } else {
       throw new HttpException(
@@ -37,7 +37,8 @@ export class AuthService {
 
   async login(user: any) {
     const doc = user._doc;
-    const payload = { username: doc.username, sub: doc._id };
+
+    const payload = { email: doc.email, sub: doc._id };
 
     return {
       access_token: this.jwtService.sign(payload),

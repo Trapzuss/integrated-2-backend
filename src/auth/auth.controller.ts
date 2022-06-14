@@ -64,15 +64,6 @@ export class AuthController {
     }
   }
 
-  // @Get('session')
-  // async getAuthStssion(@Session() session: Record<string, any>) {
-  //   console.log(session);
-  //   console.log(session.id);
-  // console.log(session.id);
-  // }
-
-  // @UseGuards(AuthenticatedGuard)
-
   @UseGuards(JwtAuthGuard)
   @Get('profile')
   getProfile(@Request() req) {
@@ -80,11 +71,7 @@ export class AuthController {
     if (req) {
       let user = req.user._doc;
       // console.log(req.user);
-      return {
-        _id: user._id,
-        username: user.username,
-        userDisplayName: user.userDisplayName,
-      };
+      return user;
     }
   }
 
@@ -93,12 +80,6 @@ export class AuthController {
   getProfileByUsername(@Param('username') username: string) {
     return this.userService.findOne(username);
   }
-
-  // @UseGuards(AuthenticatedGuard)
-  // @Get('protected')
-  // getHello(@Request() req): any {
-  //   return req.user;
-  // }
 
   @Get()
   findAll() {

@@ -2,9 +2,7 @@
 
 export default interface Address {
   _id: string;
-  street: string;
-  city: string;
+  district: string;
   province: string;
-  zipCode: number;
   country: string;
 }
