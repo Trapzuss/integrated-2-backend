@@ -11,6 +11,9 @@ export class Address {
   addressId: string;
 
   @Prop({ required: true, type: String })
+  district: string;
+
+  @Prop({ required: true, type: String })
   province: string;
 
   @Prop({ required: true, type: String })
