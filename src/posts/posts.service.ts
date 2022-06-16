@@ -13,10 +13,6 @@ export class PostsService {
     @InjectModel(User.name) private userModel: Model<UserDocument>,
   ) {}
 
-  async findNewest(): Promise<Posts[]> {
-    return this.postModel.find();
-  }
-
   // async increaseFavorite(id: string) {
   //   let post = this.postModel.findOne({ _id: id }).exec();
   //   let amount = (await post).favoriteAmount + 1;
@@ -34,17 +30,69 @@ export class PostsService {
   }
 
   async findAll(): Promise<Posts[]> {
-    return this.postModel.find().exec();
+    // db.posts.aggregate([
+    //   { $addFields: { userObjectId: { $toObjectId: '$userId' } } },
+    //   {
+    //     $lookup: {
+    //       from: 'users',
+    //       localField: 'userObjectId',
+    //       foreignField: '_id',
+    //       as: 'user',
+    //     },
+    //   },
+    //   { $project: { _id: 1, user: { password: 0 } } },
+    // ]);
+    return this.postModel
+      .aggregate([
+        { $addFields: { userObjectId: { $toObjectId: '$userId' } } },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'userObjectId',
+            foreignField: '_id',
+            as: 'user',
+          },
+        },
+        { $project: { _id: 1, user: { password: 0 } } },
+      ])
+      .exec();
   }
 
-  // findOne(id: string): any {
-  //   return this.postModel.findOne({ _id: id }).exec();
-  // }
+  async findAllWithUserId(userId: string) {
+    return this.postModel
+      .aggregate([
+        { $addFields: { userObjectId: { $toObjectId: '$userId' } } },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'userObjectId',
+            foreignField: '_id',
+            as: 'user',
+          },
+        },
+        { $match: { userId: userId } },
+        { $project: { _id: 1, user: { password: 0 } } },
+      ])
+      .exec();
+  }
+
   async findOne(id: string) {
-    let post = (await this.postModel.findOne({ _id: id })) as any;
-    let user = await this.userModel.findOne({ _id: post.userId });
-    let res = { ...post._doc, user: user };
-    return res;
+    return await this.postModel
+      .aggregate([
+        { $addFields: { userObjectId: { $toObjectId: '$userId' } } },
+        { $addFields: { postId: { $toString: '$_id' } } },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'userObjectId',
+            foreignField: '_id',
+            as: 'user',
+          },
+        },
+        { $match: { postId: id } },
+        { $project: { _id: 1, user: { password: 0 } } },
+      ])
+      .exec();
   }
 
   async update(id: string, updatePostDto: UpdatePostDto) {
