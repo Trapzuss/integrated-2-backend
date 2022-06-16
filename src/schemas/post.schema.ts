@@ -25,11 +25,14 @@ export class Posts {
   @Prop({ required: true, type: String })
   sex: string;
 
-  @Prop({ required: true, type: Number })
-  age: number;
+  @Prop({ required: true, type: Object })
+  age: {
+    year: string;
+    month: string;
+  };
 
   @Prop({ required: true, type: Number })
-  weight: number;
+  weight: string;
 
   @Prop({ required: true, type: Number })
   price: number;
@@ -37,7 +40,7 @@ export class Posts {
   @Prop({ default: Date.now, type: Date })
   createdAt: Date;
 
-  @Prop({ default: Date.now, type: Date })
+  @Prop({ default: null, type: Date })
   adoptedAt: Date;
 }
 
