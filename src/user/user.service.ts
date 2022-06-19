@@ -10,21 +10,11 @@ import { CreateAuthDto } from 'src/auth/dto/create-auth.dto';
 // };
 import { User, UserDocument } from 'src/schemas/user.schema';
 import * as bcrypt from 'bcrypt';
+import UserInterface from 'src/interfaces/user';
 @Injectable()
 export class UserService {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
-  // private readonly users: User[] = [
-  //   {
-  //     userDisplayName: 'A',
-  //     username: 'Aa',
-  //     password: '1234',
-  //   },
-  //   {
-  //     userDisplayName: 'B',
-  //     username: 'Bb',
-  //     password: '1234',
-  //   },
-  // ];
+
   async create(createAuthDto: CreateAuthDto) {
     try {
       const oldUser = await this.userModel.findOne({
@@ -52,10 +42,56 @@ export class UserService {
   }
 
   async findOne(email: string) {
-    return this.userModel.findOne({ email: email }).exec();
+    return await this.userModel.findOne({ email: email }).exec();
   }
 
   async findOneById(id: string) {
-    return this.userModel.findOne({ _id: id }).exec();
+    return await this.userModel
+      .aggregate([
+        { $addFields: { userId: { $toString: '$_id' } } },
+
+        {
+          $match: { userId: id },
+        },
+        { $project: { _id: 1, password: 0 } },
+      ])
+      .exec();
+  }
+
+  // { $addFields: { userObjectId: { $toObjectId: '$userId' } } },
+  // {
+  //   $lookup: {
+  //     from: 'users',
+  //     localField: 'userObjectId',
+  //     foreignField: '_id',
+  //     as: 'user',
+  //   },
+  // },
+  // { $project: { _id: 1, user: { password: 0 } } },
+
+  async findOneByIdWithPost(id: string) {
+    return await this.userModel
+      .aggregate([
+        { $addFields: { userId: { $toString: '$_id' } } },
+        {
+          $lookup: {
+            from: 'posts',
+            localField: 'userId',
+            foreignField: 'userId',
+            as: 'posts',
+          },
+        },
+        {
+          $match: { userId: id },
+        },
+        { $project: { _id: 1, password: 0 } },
+      ])
+      .exec();
+  }
+
+  async updateOne(id, data: UserInterface) {
+    return await this.userModel
+      .updateOne({ _id: id }, { $set: { ...data } })
+      .exec();
   }
 }
