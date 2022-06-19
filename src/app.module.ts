@@ -13,6 +13,7 @@ import { UserModule } from './user/user.module';
 import { MessagesModule } from './messages/messages.module';
 import { MessagesGateway } from './messages/messages.gateway';
 import { ConfigModule } from '@nestjs/config';
+import { UploadModule } from './upload/upload.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -25,6 +26,7 @@ import { ConfigModule } from '@nestjs/config';
     AuthModule,
     UserModule,
     MessagesModule,
+    UploadModule,
   ],
   controllers: [AppController],
   providers: [AppService],

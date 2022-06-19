@@ -4,6 +4,11 @@ import * as session from 'express-session';
 import * as passport from 'passport';
 import * as cookieParser from 'cookie-parser';
 import { ConfigService } from '@nestjs/config';
+import * as firebase from 'firebase-admin';
+import { initializeApp } from 'firebase/app';
+import { getStorage } from 'firebase/storage';
+import { Environment } from './environment/firebase';
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
@@ -32,6 +37,15 @@ async function bootstrap() {
   // app.use(cookieParser());
   // app.use(passport.session());
   // app.use(passport.initialize());
+
+  // firebase.initializeApp({
+  //   credential: firebase.credential.cert({
+  //     projectId: configService.get('FIREBASE_PROJECT_ID'),
+  //     clientEmail: configService.get('FIREBASE_CLIENT_EMAIL'),
+  //     privateKey: configService.get('FIREBASE_PRIVATE_KEY'),
+  //   }),
+  //   storageBucket: configService.get('FIREBASE_STORAGE_BUCKET'),
+  // });
 
   await app.listen(port);
 }
