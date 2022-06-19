@@ -25,19 +25,30 @@ export class PostsController {
   // Basic CRUD
   @Post()
   create(@Body() createPostDto: CreatePostDto) {
+    // console.log(createPostDto);
     return this.postsService.create(createPostDto);
   }
 
   @Get()
-  findAllWithUserId(@Query('userId') userId: string) {
-    if (!userId) {
+  findAllWithUserId(
+    @Query('userId') userId: string,
+    @Query('keyword') keyword: string,
+  ) {
+    if (!userId && !keyword) {
       return this.postsService.findAll();
     }
-    return this.postsService.findAllWithUserId(userId);
+    if (userId) {
+      return this.postsService.findAllWithUserId(userId);
+    }
+    if (keyword) {
+      return this.postsService.findWithKeyword(keyword);
+    }
   }
 
   @Get()
   findAll() {
+    // console.log('findAll');
+
     return this.postsService.findAll();
   }
 

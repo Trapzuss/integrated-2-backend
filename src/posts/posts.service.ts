@@ -13,35 +13,11 @@ export class PostsService {
     @InjectModel(User.name) private userModel: Model<UserDocument>,
   ) {}
 
-  // async increaseFavorite(id: string) {
-  //   let post = this.postModel.findOne({ _id: id }).exec();
-  //   let amount = (await post).favoriteAmount + 1;
-  //   let response = this.postModel.updateOne(
-  //     { _id: id },
-  //     { $set: { ...post, favoriteAmount: amount } },
-  //   );
-
-  //   return response;
-  // }
-
-  // Essential CRUD
   async create(createPostDto: CreatePostDto): Promise<Posts> {
     return new this.postModel(createPostDto).save();
   }
 
   async findAll(): Promise<Posts[]> {
-    // db.posts.aggregate([
-    //   { $addFields: { userObjectId: { $toObjectId: '$userId' } } },
-    //   {
-    //     $lookup: {
-    //       from: 'users',
-    //       localField: 'userObjectId',
-    //       foreignField: '_id',
-    //       as: 'user',
-    //     },
-    //   },
-    //   { $project: { _id: 1, user: { password: 0 } } },
-    // ]);
     return this.postModel
       .aggregate([
         { $addFields: { userObjectId: { $toObjectId: '$userId' } } },
@@ -76,6 +52,35 @@ export class PostsService {
       .exec();
   }
 
+  async findWithKeyword(keyword) {
+    // return await this.postModel.find({
+    //   $or: [
+    //     { description: { $regex: keyword } },
+    //     { petName: { $regex: keyword } },
+    //   ],
+    // });
+    return this.postModel.aggregate([
+      { $addFields: { userObjectId: { $toObjectId: '$userId' } } },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'userObjectId',
+          foreignField: '_id',
+          as: 'user',
+        },
+      },
+      {
+        $match: {
+          $or: [
+            { petName: { $regex: keyword } },
+            { description: { $regex: keyword } },
+          ],
+        },
+      },
+      { $project: { _id: 1, user: { password: 0 } } },
+    ]);
+  }
+
   async findOne(id: string) {
     return await this.postModel
       .aggregate([
@@ -96,9 +101,14 @@ export class PostsService {
   }
 
   async update(id: string, updatePostDto: UpdatePostDto) {
-    return this.postModel
-      .updateOne({ _id: id }, { $set: { ...updatePostDto } })
-      .exec();
+    try {
+      return this.postModel
+        .updateOne({ _id: id }, { $set: { ...updatePostDto } })
+        .exec();
+    } catch (error) {
+      console.log(error);
+      return error;
+    }
   }
 
   async remove(id: string) {
