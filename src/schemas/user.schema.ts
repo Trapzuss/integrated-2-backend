@@ -23,6 +23,9 @@ export class User {
   @Prop({ required: true, type: String })
   password: string;
 
+  @Prop({ type: String, default: null })
+  imageUrl: string;
+
   @Prop({ type: Date, default: Date.now() })
   createdAt: Date;
 }
