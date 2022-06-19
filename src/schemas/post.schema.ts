@@ -25,13 +25,13 @@ export class Posts {
   @Prop({ required: true, type: String })
   sex: string;
 
-  @Prop({ required: true, type: Object })
+  @Prop({ type: Object })
   age: {
     year: string;
     month: string;
   };
 
-  @Prop({ required: true, type: Number })
+  @Prop({ type: String })
   weight: string;
 
   @Prop({ required: true, type: Number })

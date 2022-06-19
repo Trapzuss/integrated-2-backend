@@ -1,4 +1,4 @@
-import internal from "stream";
+import internal from 'stream';
 
 export class CreatePostDto {
   userId: string;
@@ -7,8 +7,11 @@ export class CreatePostDto {
   address: {};
   description: string;
   sex: string;
-  age: number;
-  weight: number;
+  age: {
+    year: string;
+    month: string;
+  };
+  weight: string;
   price: number;
   createdAt: Date;
   adoptedAt: Date;

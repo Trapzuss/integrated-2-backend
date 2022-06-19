@@ -8,7 +8,10 @@ export class UpdatePostDto extends PartialType(CreatePostDto) {
   address: {};
   description: string;
   sex: string;
-  age: number;
-  weight: number;
+  age: {
+    year: string;
+    month: string;
+  };
+  weight: string;
   price: number;
 }
