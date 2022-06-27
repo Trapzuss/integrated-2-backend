@@ -10,10 +10,10 @@ import { PostsModule } from './posts/posts.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
-import { MessagesModule } from './messages/messages.module';
-import { MessagesGateway } from './messages/messages.gateway';
+
 import { ConfigModule } from '@nestjs/config';
 import { UploadModule } from './upload/upload.module';
+import { ChatsModule } from './chats/chats.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -25,8 +25,10 @@ import { UploadModule } from './upload/upload.module';
 
     AuthModule,
     UserModule,
-    MessagesModule,
+
     UploadModule,
+
+    ChatsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
