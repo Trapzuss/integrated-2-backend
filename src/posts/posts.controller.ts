@@ -30,7 +30,7 @@ export class PostsController {
   }
 
   @Get()
-  findAllWithUserId(
+  findWithQuery(
     @Query('userId') userId: string,
     @Query('keyword') keyword: string,
   ) {
@@ -47,9 +47,12 @@ export class PostsController {
 
   @Get()
   findAll() {
-    // console.log('findAll');
-
     return this.postsService.findAll();
+  }
+
+  @Get('/computed/:userId')
+  findAllComputed(@Param('userId') userId: string) {
+    return this.postsService.findAllComputed(userId);
   }
 
   @Get(':id')

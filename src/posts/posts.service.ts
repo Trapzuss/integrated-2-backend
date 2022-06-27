@@ -17,6 +17,41 @@ export class PostsService {
     return new this.postModel(createPostDto).save();
   }
 
+  async findAllComputed(userId: string): Promise<Posts[]> {
+    let posts = await this.postModel
+      .aggregate([
+        { $addFields: { userObjectId: { $toObjectId: '$userId' } } },
+        { $addFields: { postIdString: { $toString: '$_id' } } },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'userObjectId',
+            foreignField: '_id',
+            as: 'user',
+          },
+        },
+        { $unwind: '$user' },
+        {
+          $lookup: {
+            from: 'chats',
+            localField: 'postIdString',
+            foreignField: 'postId',
+            as: 'chat',
+          },
+        },
+        { $project: { _id: 1, user: { password: 0 }, chat: { messages: 0 } } },
+      ])
+      .exec();
+
+    let postsComputed = posts.filter((post: any) =>
+      post?.chat?.filter((el: any) => el?.participants?.includes(userId)),
+    );
+    let result = postsComputed.map((post) => {
+      return { ...post, chat: post?.chat[0] };
+    });
+    return result;
+  }
+
   async findAll(): Promise<Posts[]> {
     return this.postModel
       .aggregate([
@@ -29,6 +64,7 @@ export class PostsService {
             as: 'user',
           },
         },
+        { $unwind: '$user' },
         { $project: { _id: 1, user: { password: 0 } } },
       ])
       .exec();
@@ -46,6 +82,7 @@ export class PostsService {
             as: 'user',
           },
         },
+        { $unwind: '$user' },
         { $match: { userId: userId } },
         { $project: { _id: 1, user: { password: 0 } } },
       ])
@@ -69,6 +106,7 @@ export class PostsService {
           as: 'user',
         },
       },
+      { $unwind: '$user' },
       {
         $match: {
           $or: [
@@ -77,6 +115,7 @@ export class PostsService {
           ],
         },
       },
+
       { $project: { _id: 1, user: { password: 0 } } },
     ]);
   }
@@ -94,6 +133,7 @@ export class PostsService {
             as: 'user',
           },
         },
+        { $unwind: '$user' },
         { $match: { postId: id } },
         { $project: { _id: 1, user: { password: 0 } } },
       ])
@@ -103,7 +143,10 @@ export class PostsService {
   async update(id: string, updatePostDto: UpdatePostDto) {
     try {
       return this.postModel
-        .updateOne({ _id: id }, { $set: { ...updatePostDto } })
+        .updateOne(
+          { _id: id },
+          { $set: { ...updatePostDto, updatedAt: Date.now() } },
+        )
         .exec();
     } catch (error) {
       console.log(error);
