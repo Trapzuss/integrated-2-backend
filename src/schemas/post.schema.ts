@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import AddressInterface from 'src/interfaces/address';
-import { Address } from './address.schema';
+import { AddressSchema } from './address.schema';
 
 export type PostsDocument = Posts & Document;
 
@@ -16,8 +16,8 @@ export class Posts {
   @Prop({ required: true, type: Array })
   images: string;
 
-  @Prop({ required: true, type: Object })
-  address: Address;
+  @Prop({ required: true, type: AddressSchema })
+  address: AddressInterface;
 
   @Prop({ required: true, type: String })
   description: string;
@@ -37,8 +37,14 @@ export class Posts {
   @Prop({ required: true, type: Number })
   price: number;
 
+  @Prop({ default: null, type: String })
+  adoptedBy: String;
+
   @Prop({ default: Date.now, type: Date })
   createdAt: Date;
+
+  @Prop({ default: Date.now, type: Date })
+  updatedAt: Date;
 
   @Prop({ default: null, type: Date })
   adoptedAt: Date;
