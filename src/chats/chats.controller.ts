@@ -1,0 +1,55 @@
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+} from '@nestjs/common';
+import { ChatsService } from './chats.service';
+import { CreateChatDto } from './dto/create-chat.dto';
+import { UpdateChatDto } from './dto/update-chat.dto';
+
+@Controller('chats')
+export class ChatsController {
+  constructor(private readonly chatsService: ChatsService) {}
+
+  @Post()
+  create(@Body() createChatDto: CreateChatDto) {
+    return this.chatsService.create(createChatDto);
+  }
+
+  @Get()
+  findUserChatByUserId(@Query('userId') userId) {
+    // console.log(userId);
+    // console.log('chat userId');
+    if (userId == null) {
+      return this.chatsService.findAll();
+    }
+
+    // console.log(userId);
+    return this.chatsService.findUserChatById(userId);
+  }
+
+  @Get()
+  findAll() {
+    return this.chatsService.findAll();
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.chatsService.findOne(+id);
+  }
+
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updateChatDto: UpdateChatDto) {
+    return this.chatsService.update(+id, updateChatDto);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.chatsService.remove(+id);
+  }
+}

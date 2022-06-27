@@ -1,8 +1,11 @@
+import Address from 'src/interfaces/address';
 import { isString } from 'util';
 
 export class CreateAuthDto {
-  userDisplayName: string;
-  username: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  address: Address;
   password: string;
-  postList?: Array<any>;
+  createdAt: Date;
 }

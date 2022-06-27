@@ -10,12 +10,25 @@ import { PostsModule } from './posts/posts.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
+
+import { ConfigModule } from '@nestjs/config';
+import { UploadModule } from './upload/upload.module';
+import { ChatsModule } from './chats/chats.module';
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    MongooseModule.forRoot(process.env.MONGO_URI),
+
     PostsModule,
-    MongooseModule.forRoot('mongodb://localhost:27017/gallery'),
+
     AuthModule,
     UserModule,
+
+    UploadModule,
+
+    ChatsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   Request,
+  Query,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
@@ -21,20 +22,27 @@ export class PostsController {
     private readonly userService: UserService,
   ) {}
 
-  @Get('newest')
-  findNewest() {
-    return this.postsService.findNewest();
-  }
-
-  @Post(':id')
-  increaseFavorite(@Param('id') id: string) {
-    return this.postsService.increaseFavorite(id);
-  }
-
   // Basic CRUD
   @Post()
   create(@Body() createPostDto: CreatePostDto) {
+    // console.log(createPostDto);
     return this.postsService.create(createPostDto);
+  }
+
+  @Get()
+  findWithQuery(
+    @Query('userId') userId: string,
+    @Query('keyword') keyword: string,
+  ) {
+    if (!userId && !keyword) {
+      return this.postsService.findAll();
+    }
+    if (userId) {
+      return this.postsService.findAllWithUserId(userId);
+    }
+    if (keyword) {
+      return this.postsService.findWithKeyword(keyword);
+    }
   }
 
   @Get()
@@ -42,14 +50,14 @@ export class PostsController {
     return this.postsService.findAll();
   }
 
+  @Get('/computed/:userId')
+  findAllComputed(@Param('userId') userId: string) {
+    return this.postsService.findAllComputed(userId);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string): any {
     let post = this.postsService.findOne(id);
-    // let user = this.userService.findOneById(post.userId);
-    // console.log(post);
-    // console.log(user);
-    // let response = { ...post, ...user } as any;
-    // console.log(response);
     return post;
   }
 

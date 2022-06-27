@@ -24,6 +24,8 @@ import { get } from 'http';
 import { LocalAuthGuard } from './local-auth-guard';
 import { AuthenticatedGuard } from './authenticated.guard';
 import { UserService } from 'src/user/user.service';
+import { JwtAuthGuard } from './jwt-auth-guard';
+import { Public } from 'src/utils/decorator';
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -34,15 +36,21 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @Post('login')
   login(@Request() req): any {
-    return { msg: 'Logged in!' };
+    return this.authService.login(req.user);
   }
 
   @Post('register')
   register(@Body() createAuthDto: CreateAuthDto) {
-    return this.authService.create(createAuthDto);
+    try {
+      return this.authService.create(createAuthDto);
+    } catch (error) {
+      console.log('is in error');
+      console.log(error);
+      return error.response.data.message;
+    }
   }
 
-  @Get('logout')
+  @Post('logout')
   async logout(@Request() req, @Response({ passthrough: true }) res) {
     try {
       await req.session?.destroy();
@@ -51,30 +59,19 @@ export class AuthController {
 
       return { msg: 'Log out' };
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       return error.response.data.message;
     }
   }
 
-  @Get('session')
-  async getAuthStssion(@Session() session: Record<string, any>) {
-    console.log(session);
-    console.log(session.id);
-
-    // console.log(session.id);
-  }
-
-  @UseGuards(AuthenticatedGuard)
+  @UseGuards(JwtAuthGuard)
   @Get('profile')
   getProfile(@Request() req) {
+    // console.log(req.user);
     if (req) {
       let user = req.user._doc;
-      // console.log(req.user._doc);
-      return {
-        _id: user._id,
-        username: user.username,
-        userDisplayName: user.userDisplayName,
-      };
+      // console.log(req.user);
+      return user;
     }
   }
 
@@ -82,13 +79,6 @@ export class AuthController {
   @Get(':username')
   getProfileByUsername(@Param('username') username: string) {
     return this.userService.findOne(username);
-  }
-
-  @UseGuards(AuthenticatedGuard)
-  @Get('protected')
-  getHello(@Request() req): any {
-    // return this.authService.findAll();
-    return req.user;
   }
 
   @Get()

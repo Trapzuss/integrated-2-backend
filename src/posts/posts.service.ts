@@ -13,44 +13,145 @@ export class PostsService {
     @InjectModel(User.name) private userModel: Model<UserDocument>,
   ) {}
 
-  async findNewest(): Promise<Posts[]> {
-    return this.postModel.find();
-  }
-
-  async increaseFavorite(id: string) {
-    let post = this.postModel.findOne({ _id: id }).exec();
-    let amount = (await post).favoriteAmount + 1;
-    let response = this.postModel.updateOne(
-      { _id: id },
-      { $set: { ...post, favoriteAmount: amount } },
-    );
-
-    return response;
-  }
-
-  // Essential CRUD
   async create(createPostDto: CreatePostDto): Promise<Posts> {
     return new this.postModel(createPostDto).save();
   }
 
-  async findAll(): Promise<Posts[]> {
-    return this.postModel.find().exec();
+  async findAllComputed(userId: string): Promise<Posts[]> {
+    let posts = await this.postModel
+      .aggregate([
+        { $addFields: { userObjectId: { $toObjectId: '$userId' } } },
+        { $addFields: { postIdString: { $toString: '$_id' } } },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'userObjectId',
+            foreignField: '_id',
+            as: 'user',
+          },
+        },
+        { $unwind: '$user' },
+        {
+          $lookup: {
+            from: 'chats',
+            localField: 'postIdString',
+            foreignField: 'postId',
+            as: 'chat',
+          },
+        },
+        { $project: { _id: 1, user: { password: 0 }, chat: { messages: 0 } } },
+      ])
+      .exec();
+
+    let postsComputed = posts.filter((post: any) =>
+      post?.chat?.filter((el: any) => el?.participants?.includes(userId)),
+    );
+    let result = postsComputed.map((post) => {
+      return { ...post, chat: post?.chat[0] };
+    });
+    return result;
   }
 
-  // findOne(id: string): any {
-  //   return this.postModel.findOne({ _id: id }).exec();
-  // }
+  async findAll(): Promise<Posts[]> {
+    return this.postModel
+      .aggregate([
+        { $addFields: { userObjectId: { $toObjectId: '$userId' } } },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'userObjectId',
+            foreignField: '_id',
+            as: 'user',
+          },
+        },
+        { $unwind: '$user' },
+        { $project: { _id: 1, user: { password: 0 } } },
+      ])
+      .exec();
+  }
+
+  async findAllWithUserId(userId: string) {
+    return this.postModel
+      .aggregate([
+        { $addFields: { userObjectId: { $toObjectId: '$userId' } } },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'userObjectId',
+            foreignField: '_id',
+            as: 'user',
+          },
+        },
+        { $unwind: '$user' },
+        { $match: { userId: userId } },
+        { $project: { _id: 1, user: { password: 0 } } },
+      ])
+      .exec();
+  }
+
+  async findWithKeyword(keyword) {
+    // return await this.postModel.find({
+    //   $or: [
+    //     { description: { $regex: keyword } },
+    //     { petName: { $regex: keyword } },
+    //   ],
+    // });
+    return this.postModel.aggregate([
+      { $addFields: { userObjectId: { $toObjectId: '$userId' } } },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'userObjectId',
+          foreignField: '_id',
+          as: 'user',
+        },
+      },
+      { $unwind: '$user' },
+      {
+        $match: {
+          $or: [
+            { petName: { $regex: keyword } },
+            { description: { $regex: keyword } },
+          ],
+        },
+      },
+
+      { $project: { _id: 1, user: { password: 0 } } },
+    ]);
+  }
+
   async findOne(id: string) {
-    let post = (await this.postModel.findOne({ _id: id })) as any;
-    let user = await this.userModel.findOne({ _id: post.userId });
-    let res = { ...post._doc, user: user };
-    return res;
+    return await this.postModel
+      .aggregate([
+        { $addFields: { userObjectId: { $toObjectId: '$userId' } } },
+        { $addFields: { postId: { $toString: '$_id' } } },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'userObjectId',
+            foreignField: '_id',
+            as: 'user',
+          },
+        },
+        { $unwind: '$user' },
+        { $match: { postId: id } },
+        { $project: { _id: 1, user: { password: 0 } } },
+      ])
+      .exec();
   }
 
   async update(id: string, updatePostDto: UpdatePostDto) {
-    return this.postModel
-      .updateOne({ _id: id }, { $set: { ...updatePostDto } })
-      .exec();
+    try {
+      return this.postModel
+        .updateOne(
+          { _id: id },
+          { $set: { ...updatePostDto, updatedAt: Date.now() } },
+        )
+        .exec();
+    } catch (error) {
+      console.log(error);
+      return error;
+    }
   }
 
   async remove(id: string) {
