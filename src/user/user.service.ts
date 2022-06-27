@@ -81,6 +81,7 @@ export class UserService {
             as: 'posts',
           },
         },
+        // { $unwind: '$posts' },
         {
           $match: { userId: id },
         },
