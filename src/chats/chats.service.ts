@@ -46,25 +46,31 @@ export class ChatsService {
       { $project: { _id: 1, user: { password: 0 } } },
     ]);
     // console.log(res);
-    let toUser;
+    let toUser = {};
+    let chats = [];
     if (res.length != 0) {
-      let chats = res.filter((chat) => {
+      chats = res.filter((chat) => {
+        // console.log(chat.participants.includes(userId));
         return chat.participants.includes(userId);
       });
-      for (let chat of chats) {
-        for (let participantId of chat?.participants) {
-          if (participantId != userId) {
-            let toUserData = await this.userModel.findOne(
-              { _id: participantId },
-              { password: 0, address: 0 },
-            );
-            // console.log(toUserData);
-            toUser = toUserData;
+      // console.log(chats);
+      if (chats.length != 0) {
+        for (let chat of chats) {
+          for (let participantId of chat?.participants) {
+            if (participantId != userId) {
+              let toUserData = await this.userModel.findOne(
+                { _id: participantId },
+                { password: 0, address: 0 },
+              );
+              // console.log(toUserData);
+              toUser = toUserData;
+            }
           }
         }
       }
     }
-    let payload = res.map((chat: any) => {
+    // console.log(toUser);
+    let payload = chats.map((chat: any) => {
       return { ...chat, toUser: toUser };
     });
     // console.log(payload);
