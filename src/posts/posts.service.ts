@@ -17,7 +17,7 @@ export class PostsService {
     return new this.postModel(createPostDto).save();
   }
 
-  async findAllComputed(userId: string): Promise<Posts[]> {
+  async findAllComputed(userId: string): Promise<any> {
     let posts = await this.postModel
       .aggregate([
         { $addFields: { userObjectId: { $toObjectId: '$userId' } } },
@@ -39,17 +39,41 @@ export class PostsService {
             as: 'chat',
           },
         },
+
         { $project: { _id: 1, user: { password: 0 }, chat: { messages: 0 } } },
       ])
       .exec();
-
+    // console.log(userId);
     let postsComputed = posts.filter((post: any) =>
       post?.chat?.filter((el: any) => el?.participants?.includes(userId)),
     );
-    let result = postsComputed.map((post) => {
-      return { ...post, chat: post?.chat[0] };
-    });
-    return result;
+
+    // let postsMapped = postsComputed.map((post) => {
+    //   return { ...post, chat: { ...post?.chat[0] } };
+    // });
+    let postsMapped = [];
+    for (let post of postsComputed) {
+      let toUser;
+      let participants = post?.chat[0]?.participants;
+      // console.log(participants);
+      if (participants != undefined) {
+        // console.log(participants);
+        for (let participantId of participants) {
+          if (participantId != userId) {
+            toUser = await this.userModel.findOne(
+              { _id: participantId },
+              { password: 0, address: 0 },
+            );
+          }
+        }
+      }
+      let payload = { ...post, chat: { ...post?.chat[0], toUser } };
+      postsMapped.push(payload);
+    }
+    // console.log(postsMapped);
+
+    // console.log(result);
+    return postsMapped;
   }
 
   async findAll(): Promise<Posts[]> {
