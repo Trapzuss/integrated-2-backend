@@ -46,8 +46,9 @@ export class ChatsService {
       { $project: { _id: 1, user: { password: 0 } } },
     ]);
     // console.log(res);
-    let toUser = {};
+
     let chats = [];
+    let result = [];
     if (res.length != 0) {
       chats = res.filter((chat) => {
         // console.log(chat.participants.includes(userId));
@@ -55,6 +56,7 @@ export class ChatsService {
       });
       // console.log(chats);
       if (chats.length != 0) {
+        let toUser = {};
         for (let chat of chats) {
           for (let participantId of chat?.participants) {
             if (participantId != userId) {
@@ -62,19 +64,17 @@ export class ChatsService {
                 { _id: participantId },
                 { password: 0, address: 0 },
               );
-              // console.log(toUserData);
+
               toUser = toUserData;
             }
           }
+
+          result.push({ ...chat, toUser: toUser });
         }
       }
     }
-    // console.log(toUser);
-    let payload = chats.map((chat: any) => {
-      return { ...chat, toUser: toUser };
-    });
-    // console.log(payload);
-    return payload;
+
+    return result;
   }
 
   findAll() {

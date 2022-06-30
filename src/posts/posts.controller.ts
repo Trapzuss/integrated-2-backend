@@ -51,8 +51,14 @@ export class PostsController {
   }
 
   @Get('/computed/:userId')
-  findAllComputed(@Param('userId') userId: string) {
-    return this.postsService.findAllComputed(userId);
+  findAllComputed(
+    @Query('type') type: string,
+    @Param('userId') userId: string,
+  ) {
+    if (type == null) {
+      return this.postsService.findAllComputed(userId);
+    }
+    return this.postsService.findAllTypeQuery(type, userId);
   }
 
   @Get(':id')

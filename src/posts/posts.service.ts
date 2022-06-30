@@ -30,7 +30,28 @@ export class PostsService {
             as: 'user',
           },
         },
-        { $unwind: '$user' },
+        {
+          $unwind: {
+            path: '$user',
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        { $addFields: { adoptedByUserId: { $toObjectId: '$adoptedBy' } } },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'adoptedByUserId',
+            foreignField: '_id',
+            as: 'adoptedUser',
+          },
+        },
+
+        {
+          $unwind: {
+            path: '$adoptedUser',
+            preserveNullAndEmptyArrays: true,
+          },
+        },
         {
           $lookup: {
             from: 'chats',
@@ -43,21 +64,40 @@ export class PostsService {
         { $project: { _id: 1, user: { password: 0 }, chat: { messages: 0 } } },
       ])
       .exec();
-    // console.log(userId);
-    let postsComputed = posts.filter((post: any) =>
-      post?.chat?.filter((el: any) => el?.participants?.includes(userId)),
-    );
 
-    // let postsMapped = postsComputed.map((post) => {
-    //   return { ...post, chat: { ...post?.chat[0] } };
-    // });
+    // computed only participation chat
+    let postsComputed = [];
+    for (let post of posts) {
+      if (post?.chat.length == 0) {
+        // console.log('no chat');
+        postsComputed.push(post);
+      } else {
+        for (let chat of post?.chat) {
+          // console.log('have chat');
+          if (chat?.participants.includes(userId)) {
+            // console.log('include');
+            postsComputed.push(post);
+            break;
+          } else {
+            // console.log('exclude');
+            let postNoChat = { ...post, chat: {} };
+            // console.log(postNoChat);
+            postsComputed.push(postNoChat);
+            break;
+          }
+        }
+      }
+    }
+
+    postsComputed.sort((a, b) => b.createdAt - a.createdAt);
+
+    // get toUser
     let postsMapped = [];
     for (let post of postsComputed) {
       let toUser;
       let participants = post?.chat[0]?.participants;
-      // console.log(participants);
+
       if (participants != undefined) {
-        // console.log(participants);
         for (let participantId of participants) {
           if (participantId != userId) {
             toUser = await this.userModel.findOne(
@@ -70,10 +110,22 @@ export class PostsService {
       let payload = { ...post, chat: { ...post?.chat[0], toUser } };
       postsMapped.push(payload);
     }
-    // console.log(postsMapped);
 
-    // console.log(result);
     return postsMapped;
+  }
+
+  async findAllTypeQuery(type: string, userId: string) {
+    let results = [];
+    let posts = await this.findAllComputed(userId);
+    // console.log(posts);
+    for (let post of posts) {
+      if (type == 'available') {
+        if (post?.adoptedBy == null) {
+          results.push(post);
+        }
+      }
+    }
+    return results;
   }
 
   async findAll(): Promise<Posts[]> {
@@ -95,9 +147,10 @@ export class PostsService {
   }
 
   async findAllWithUserId(userId: string) {
-    return this.postModel
+    return await this.postModel
       .aggregate([
         { $addFields: { userObjectId: { $toObjectId: '$userId' } } },
+        { $addFields: { adoptedByUserId: { $toObjectId: '$adoptedBy' } } },
         {
           $lookup: {
             from: 'users',
@@ -106,9 +159,37 @@ export class PostsService {
             as: 'user',
           },
         },
-        { $unwind: '$user' },
+
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'adoptedByUserId',
+            foreignField: '_id',
+            as: 'adoptedUser',
+          },
+        },
+
         { $match: { userId: userId } },
-        { $project: { _id: 1, user: { password: 0 } } },
+        {
+          $unwind: {
+            path: '$user',
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $unwind: {
+            path: '$adoptedUser',
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+
+        {
+          $project: {
+            _id: 1,
+            user: { password: 0 },
+            adoptedUser: { password: 0 },
+          },
+        },
       ])
       .exec();
   }
@@ -134,8 +215,11 @@ export class PostsService {
       {
         $match: {
           $or: [
-            { petName: { $regex: keyword } },
-            { description: { $regex: keyword } },
+            { petName: { $regex: keyword, $options: 'i' } },
+            { description: { $regex: keyword, $options: 'i' } },
+            { 'address.district': { $regex: keyword, $options: 'i' } },
+            { 'address.province': { $regex: keyword, $options: 'i' } },
+            { 'address.country': { $regex: keyword, $options: 'i' } },
           ],
         },
       },
