@@ -65,29 +65,36 @@ export class PostsService {
       ])
       .exec();
 
-    // computed only participation chat
+    // filter only participation chat
     let postsComputed = [];
-    for (let post of posts) {
+    for (let [i, post] of posts.entries()) {
+      // console.log(userId);
       if (post?.chat.length == 0) {
+        // console.log(post.chat);
         // console.log('no chat');
         postsComputed.push(post);
       } else {
-        for (let chat of post?.chat) {
-          // console.log('have chat');
-          if (chat?.participants.includes(userId)) {
-            // console.log('include');
-            postsComputed.push(post);
-            break;
-          } else {
-            // console.log('exclude');
-            let postNoChat = { ...post, chat: {} };
-            // console.log(postNoChat);
-            postsComputed.push(postNoChat);
-            break;
-          }
+        // TODO fix this
+        let includedChat = post?.chat.find((chat: any) => {
+          // console.log(chat);
+          return chat?.participants.includes(userId);
+        });
+        if (includedChat) {
+          postsComputed.push(post);
         }
+
+        // for (let [i, chat] of post?.chat.entries()) {
+        //   if (chat?.participants.includes(userId)) {
+        //     postsComputed.push(post);
+        //   } else {
+        //     let postNoChat = { ...post, chat: {} };
+        //     postsComputed.push(postNoChat);
+        //   }
+        // }
+        // postsComputed.push(post);
       }
     }
+    // return postsComputed;
 
     postsComputed.sort((a, b) => b.createdAt - a.createdAt);
 
