@@ -81,6 +81,8 @@ export class PostsService {
         });
         if (includedChat) {
           postsComputed.push(post);
+        } else {
+          postsComputed.push(post);
         }
 
         // for (let [i, chat] of post?.chat.entries()) {
@@ -124,7 +126,8 @@ export class PostsService {
   async findAllTypeQuery(type: string, userId: string) {
     let results = [];
     let posts = await this.findAllComputed(userId);
-    // console.log(posts);
+    // console.log(type);
+    // return posts;
     for (let post of posts) {
       if (type == 'available') {
         if (post?.adoptedBy == null) {
