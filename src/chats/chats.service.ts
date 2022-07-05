@@ -51,7 +51,6 @@ export class ChatsService {
     let result = [];
     if (res.length != 0) {
       chats = res.filter((chat) => {
-        // console.log(chat.participants.includes(userId));
         return chat.participants.includes(userId);
       });
       // console.log(chats);
@@ -60,12 +59,14 @@ export class ChatsService {
         for (let chat of chats) {
           for (let participantId of chat?.participants) {
             if (participantId != userId) {
+              // console.log(participantId);
               let toUserData = await this.userModel.findOne(
                 { _id: participantId },
                 { password: 0, address: 0 },
               );
 
               toUser = toUserData;
+              // console.log(toUserData);
             }
           }
 
@@ -73,7 +74,9 @@ export class ChatsService {
         }
       }
     }
-
+    // filter by updatedAt
+    result.sort((a, b) => b.updatedAt - a.updatedAt);
+    // postsComputed.sort((a, b) => b.createdAt - a.createdAt);
     return result;
   }
 
